@@ -7,7 +7,9 @@ import static org.hamcrest.CoreMatchers.is;
 import java.util.Date;
 
 import org.hamcrest.CoreMatchers;
+import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
@@ -25,6 +27,16 @@ public class LocacaoServiceTest {
 	
 	@Rule
 	public ExpectedException exception = ExpectedException.none();
+	
+	@Before
+	public void setup() {
+		System.out.println("Before");
+	}
+	
+	@After
+	public void tearDown() {
+		System.out.println("After");
+	}
 
 	@Test
 	public void teste() throws Exception {
@@ -33,6 +45,7 @@ public class LocacaoServiceTest {
 		Usuario usuario = new Usuario();
 		Filme filme = new Filme("Filme 1", 2, 5.0);
 		
+		System.out.println("Teste");
 		//acao
 		Locacao locacao = service.alugarFilme(usuario, filme);
 
