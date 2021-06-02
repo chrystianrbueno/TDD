@@ -3,14 +3,16 @@ package br.ce.wcaquino.servicos;
 import static br.ce.wcaquino.utils.DataUtils.isMesmaData;
 import static br.ce.wcaquino.utils.DataUtils.obterDataComDiferencaDias;
 import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 import org.hamcrest.CoreMatchers;
 import org.junit.Assert;
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -22,6 +24,8 @@ import br.ce.wcaquino.entidades.Locacao;
 import br.ce.wcaquino.entidades.Usuario;
 import br.ce.wcaquino.exceptions.FilmeSemEstoqueException;
 import br.ce.wcaquino.exceptions.LocadoraException;
+import br.ce.wcaquino.matchers.MatchersProprios;
+import br.ce.wcaquino.utils.DataUtils;
 
 public class LocacaoServiceTest {
 	
@@ -40,6 +44,8 @@ public class LocacaoServiceTest {
 	
 	@Test
 	public void deveAlugarFilme() throws Exception {
+		Assume.assumeTrue(DataUtils.verificarDiaSemana(new Date(), Calendar.SATURDAY));
+		
 		//cenario
 		Usuario usuario = new Usuario("Usuario 1");
 		List<Filme> filmes = Arrays.asList(new Filme("Filme", 1, 5.0));
@@ -51,6 +57,7 @@ public class LocacaoServiceTest {
 		error.checkThat(locacao.getValor(), CoreMatchers.is(5.0));
 		error.checkThat(isMesmaData(locacao.getDataLocacao(), new Date()), CoreMatchers.is(true)) ;
 		error.checkThat(isMesmaData(locacao.getDataRetorno(), obterDataComDiferencaDias(1)), is(true));
+		error.checkThat(locacao.getDataRetorno(), MatchersProprios.ehHojeComDiferencaDias(1));
 
 	}
 	
@@ -91,68 +98,15 @@ public class LocacaoServiceTest {
 	}
 	
 	@Test
-	public void devePagar75PctNoFilme3() throws FilmeSemEstoqueException, LocadoraException {
-		//cenario
-		Usuario usuario = new Usuario("Usuario 1");
-		List<Filme> filmes = Arrays.asList(
-											new Filme("Filme1", 2 , 4.0),
-											new Filme("Filme2", 2 , 4.0),
-											new Filme("Filme3", 2 , 4.0)
-											);
+	public void devolverNaSegunda() throws FilmeSemEstoqueException, LocadoraException {
+		Assume.assumeTrue(DataUtils.verificarDiaSemana(new Date(), Calendar.SATURDAY));
 		
-		//acao
-		Locacao resultado = service.alugarFilme(usuario, filmes);
-		Assert.assertThat(resultado.getValor(), CoreMatchers.is(11.0));
+		Usuario usuario = new Usuario("Usuario 1");
+		List<Filme> filmes = Arrays.asList(new Filme("Filme 1", 1, 5.0));
+		
+		Locacao retorno =  service.alugarFilme(usuario, filmes);
+		
+		assertThat(retorno.getDataRetorno(), MatchersProprios.caiNumaSegunda());
 	}
 	
-	@Test
-	public void devePagar50PctNoFilme3() throws FilmeSemEstoqueException, LocadoraException {
-		//cenario
-		Usuario usuario = new Usuario("Usuario 1");
-		List<Filme> filmes = Arrays.asList(
-											new Filme("Filme1", 2 , 4.0),
-											new Filme("Filme1", 2 , 4.0),
-											new Filme("Filme2", 2 , 4.0),
-											new Filme("Filme3", 2 , 4.0)
-											);
-		
-		//acao
-		Locacao resultado = service.alugarFilme(usuario, filmes);
-		Assert.assertThat(resultado.getValor(), CoreMatchers.is(13.0));
-	}
-
-	@Test
-	public void devePagar25PctNoFilme3() throws FilmeSemEstoqueException, LocadoraException {
-		//cenario
-		Usuario usuario = new Usuario("Usuario 1");
-		List<Filme> filmes = Arrays.asList(
-											new Filme("Filme1", 2 , 4.0),
-											new Filme("Filme1", 2 , 4.0),
-											new Filme("Filme2", 2 , 4.0),
-											new Filme("Filme3", 2 , 4.0),
-											new Filme("Filme4", 2 , 4.0)
-											);
-		
-		//acao
-		Locacao resultado = service.alugarFilme(usuario, filmes);
-		Assert.assertThat(resultado.getValor(), CoreMatchers.is(14.0));
-	}
-
-	@Test
-	public void devePagar25PctNoFilme4() throws FilmeSemEstoqueException, LocadoraException {
-		//cenario
-		Usuario usuario = new Usuario("Usuario 1");
-		List<Filme> filmes = Arrays.asList(
-											new Filme("Filme1", 2 , 4.0),
-											new Filme("Filme1", 2 , 4.0),
-											new Filme("Filme2", 2 , 4.0),
-											new Filme("Filme3", 2 , 4.0),
-											new Filme("Filme4", 2 , 4.0),
-											new Filme("Filme5", 2 , 4.0)
-											);
-		
-		//acao
-		Locacao resultado = service.alugarFilme(usuario, filmes);
-		Assert.assertThat(resultado.getValor(), CoreMatchers.is(14.0));
-	}
 }
